@@ -1,9 +1,9 @@
-﻿using System.ComponentModel;
-using System.Runtime.InteropServices;
-using System.Xml;
-using System.IO;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Xml;
 
 class Program {
     static bool IsDebug;
@@ -11,7 +11,12 @@ class Program {
         { "-d" , () => { IsDebug = true; } },
         { "--debug" , () => { IsDebug = true; } }
     };
-    
+
+    static Dictionary<string, string> CmdUsage => new() {
+        { "append" , "append:\nUsage: append <filename> <content>" },
+        { "create" , "create:\nUsage: create <filename> "}
+    };
+
     static void Log(string text , string state) {
         Dictionary<string, string> colors = new() {
             { "nml" , "\u001b[1;37m"},
@@ -61,6 +66,7 @@ class Program {
 
         if (!Directory.Exists(input)) {
             Log("Unknown directory/file!", "err");
+            return;
         }
 
         foreach (string item in Directory.EnumerateFileSystemEntries(input)) {
@@ -76,6 +82,14 @@ class Program {
 
     static void Create(string input) {
         string[] items = input.Split();
+
+        // Console.WriteLine(items.Length);
+
+        if (items.Length == 1) {
+            Log(CmdUsage["create"] , "nml");
+            return;
+        }
+
         bool isDir = false;
         foreach (string item in items) {
             if (item == "-d") {
@@ -143,7 +157,7 @@ class Program {
         string[] items = input.Split(' ', 2);
         
         if (!(items.Length == 2)) {
-            Log("append:\nUsage: append <filename> <content>" , "normal");
+            Log(CmdUsage["append"] , "nml");
             return;
         }
 
@@ -162,6 +176,7 @@ class Program {
         };
 
         try {
+            // Console.WriteLine(input.Split()[0]);
             AvailableCommands[input.Split()[0]]();
         } catch (KeyNotFoundException) {
             Log("Unknown command!" , "err");
