@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Timers;
 using System.Xml;
 
 class Program {
@@ -14,8 +15,16 @@ class Program {
 
     static Dictionary<string, string> CmdUsage => new() {
         { "append" , "append:\nUsage: append <filename> <content>" },
-        { "create" , "create:\nUsage: create <filename> "}
+        { "create" , "create:\nUsage: create <filename>" },
+        { "remove" , "remove:\nUsage: remove [--force] <filename>" },
+        { "changedir" , "changedir:\nUsage: changedir <path>"}
     };
+
+    static List<string> Memory = new() {""};
+    static int PrevMemoryId = 0;
+
+    static string UserName => Environment.UserName;
+    static string UserDomainName => Environment.UserDomainName;
 
     static void Log(string text , string state) {
         Dictionary<string, string> colors = new() {
@@ -36,19 +45,85 @@ class Program {
             }
         }
     }
+    
+    static string UserInput() { // Scary function, #1 optimization target
+        string msg = $"{UserName}@{UserDomainName} {Directory.GetCurrentDirectory().Replace($"/home/{UserName}", "~")} > ";
+        Console.Write(msg);
+        var buffer = new List<char>();
+        int rcursorPos = msg.Length;
+        int cursorPos = 0;
+        while (true) {
+            if (Console.KeyAvailable) {
+                var key = Console.ReadKey(true);
+                if (key.Key == ConsoleKey.Enter) {
+                    Console.WriteLine();
+                    break;
+                }
+                else if (key.Key == ConsoleKey.Backspace && rcursorPos >= cursorPos && cursorPos > 0) {
+                    cursorPos--;
+                    rcursorPos--;
+                    buffer.RemoveAt(cursorPos);
 
-    static string UserInput() {
-        Console.Write("> ");
-        string? input = Console.ReadLine();
-        
-        if (input is null) {
-            if (IsDebug) {
-                Log("User input is null, returning empty string instead..." , "wrn");
+                    Console.SetCursorPosition(rcursorPos , Console.CursorTop);
+                    Console.Write(new string(buffer.Skip(cursorPos).ToArray()) + " ");
+                    Console.SetCursorPosition(rcursorPos, Console.CursorTop);
+
+                    // Console.Write($"r: {rcursorPos} , n: {cursorPos}");
+                } else if (key.Key == ConsoleKey.LeftArrow && rcursorPos >= cursorPos && cursorPos > 0) {
+                    cursorPos--;
+                    rcursorPos--;
+
+                    Console.SetCursorPosition(rcursorPos , Console.CursorTop);
+                } else if (key.Key == ConsoleKey.RightArrow && rcursorPos >= cursorPos && cursorPos >= 0 && cursorPos < buffer.Count) {
+                    cursorPos++;
+                    rcursorPos++;
+
+                    Console.SetCursorPosition(rcursorPos , Console.CursorTop);
+                } else if (key.Key == ConsoleKey.UpArrow && PrevMemoryId > 0) {
+                    string memory = Memory[PrevMemoryId];
+
+                    Console.SetCursorPosition(msg.Length, Console.CursorTop);
+                    Console.Write(new string(' ', buffer.Count));
+                    Console.SetCursorPosition(msg.Length, Console.CursorTop);
+
+                    buffer.Clear();
+                    buffer.AddRange(memory);
+
+                    Console.Write(memory);
+
+                    cursorPos = buffer.Count;
+                    rcursorPos = msg.Length + cursorPos;
+                    PrevMemoryId--;
+                } else if (key.Key == ConsoleKey.DownArrow && PrevMemoryId + 1 != Memory.Count) {
+                    PrevMemoryId++;
+                    string memory = Memory[PrevMemoryId];
+
+                    Console.SetCursorPosition(msg.Length, Console.CursorTop);
+                    Console.Write(new string(' ', buffer.Count));
+                    Console.SetCursorPosition(msg.Length, Console.CursorTop);
+
+                    buffer.Clear();
+                    buffer.AddRange(memory);
+                    Console.Write(memory);
+
+                    cursorPos = buffer.Count;
+                    rcursorPos = msg.Length + cursorPos;
+                }
+                else if (key.KeyChar != '\0' && key.Key != ConsoleKey.Backspace) {
+                    buffer.Insert(cursorPos, key.KeyChar);
+                    cursorPos++;
+                    
+                    Console.SetCursorPosition(rcursorPos, Console.CursorTop);
+                    Console.Write(new string(buffer.Skip(cursorPos - 1).ToArray()));
+                    
+                    rcursorPos++;
+                    Console.SetCursorPosition(msg.Length + cursorPos, Console.CursorTop);
+                }
             }
-            return "";
         }
-
-        return input;
+        Memory.Add(new string(buffer.ToArray()));
+        PrevMemoryId = Memory.Count - 1;
+        return new string(buffer.ToArray());
     }
     
     static void Echo(string input) {
@@ -107,6 +182,11 @@ class Program {
     static void Remove(string input) {
         string[] items = input.Split();
 
+        if (items.Length == 1) {
+            Log(CmdUsage["remove"] , "nml");
+            return;
+        }
+
         bool force = false;
         foreach (string item in items) {
             if (item == "--force") {
@@ -164,6 +244,24 @@ class Program {
         File.AppendAllText(items[^2], items[^1]);
     }
 
+    static void Changedir(string input) {
+        string[] items = input.Split(' ' , 2 , StringSplitOptions.RemoveEmptyEntries);
+
+        if (!(items.Length == 1)) {
+            Log(CmdUsage["changedir"] , "nml");
+            return;
+        }
+
+        items[0].Replace("~", $"/home/{UserName}/");
+
+        if (!Directory.Exists(items[0])) {
+            Log("Directory not found", "err");
+            return;
+        }
+
+        Directory.SetCurrentDirectory(items[0]);
+    }
+
     static void ParseInput(string input) {
         Dictionary<string, Action> AvailableCommands = new() {
             { "echo" , () => Echo(CleanUpInput(input))},
@@ -172,7 +270,8 @@ class Program {
             { "list" , () => List(CleanUpInput(input))},
             { "create" , () => Create(CleanUpInput(input))},
             { "remove" , () => Remove(CleanUpInput(input))},
-            { "append" , () => Append(CleanUpInput(input))}
+            { "append" , () => Append(CleanUpInput(input))},
+            { "changedir" , () => Changedir(CleanUpInput(input)) }
         };
 
         try {
