@@ -24,3 +24,6 @@ sudo mv sharpy /usr/local/bin/sharpy
 ```
 
 and done!
+
+## Known Issues:
+- double up/down arrow needed to manage through "memory"
