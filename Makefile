@@ -1,7 +1,5 @@
 build:
-	@echo -e "\033[1;36m[ Make ] \033[1;37mCloning Sharpy repository...\033[0m" && \
-	git clone https://github.com/VxidDev/Sharpy.git && \
-	echo -e "\033[1;36m[ Make ] \033[1;37mCreating C# project...\033[0m" && \
+	@echo -e "\033[1;36m[ Make ] \033[1;37mCreating C# project...\033[0m" && \
 	dotnet new console -n sharpy && \
 	echo -e "\033[1;36m[ Make ] \033[1;37mImporting Sharpy code...\033[0m" && \
 	mv Sharpy/Program.cs sharpy/Program.cs && \
