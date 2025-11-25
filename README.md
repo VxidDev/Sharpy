@@ -5,10 +5,11 @@
 ## Features
 
 - Execute built-in commands like `list`, `append`, `remove`, and more
-- Navigate and manipulate directories ( NOT DONE )
-- Create, view, and edit files quickly
+- Navigate and manipulate directories
+- Create, view( Not done ), and edit files quickly
 - Simple and intuitive command syntax
 - Cross-platform support via .NET
+- Easily manipulate your command using left/right arrow or access previous commands using up/down arrows
 
 ## Installation
 
