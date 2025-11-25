@@ -281,6 +281,10 @@ class Program {
             { "changedir" , () => Changedir(CleanUpInput(input)) }
         };
 
+        if (input == "") {
+            return;
+        }
+
         try {
             // Console.WriteLine(input.Split()[0]);
             AvailableCommands[input.Split()[0]]();
