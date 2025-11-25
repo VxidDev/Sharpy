@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Timers;
-using System.Xml;
+using System.Diagnostics;
 
 class Program {
     static bool IsDebug;
@@ -252,7 +249,7 @@ class Program {
             return;
         }
 
-        items[0].Replace("~", $"/home/{UserName}/");
+        items[0] = items[0].Replace("~", $"/home/{UserName}/");
 
         if (!Directory.Exists(items[0])) {
             Log("Directory not found", "err");
@@ -278,7 +275,21 @@ class Program {
             // Console.WriteLine(input.Split()[0]);
             AvailableCommands[input.Split()[0]]();
         } catch (KeyNotFoundException) {
-            Log("Unknown command!" , "err");
+            var parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string program = parts[0];
+            string args = string.Join(' ', parts.Skip(1));
+            Process process;
+            try {
+                process = Process.Start(program, args);
+            } catch (Exception) {
+                process = null;
+            }
+
+            if (!(process is null)) {
+                process.WaitForExit();
+            } else {
+                Log("Unknown command!" , "err");
+            }
         }
     }
 
