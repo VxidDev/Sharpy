@@ -42,8 +42,43 @@ class Program {
             }
         }
     }
-    
-    static string UserInput() { // Scary function, #1 optimization target
+
+    static (int cursorPos , int rcursorPos) __UserInput_rightArrow_(int cursorPos , int rcursorPos) {
+        cursorPos++;
+        rcursorPos++;
+
+        Console.SetCursorPosition(rcursorPos, Console.CursorTop);
+
+        return ( cursorPos , rcursorPos );
+    }
+
+    static (int cursorPos , int rcursorPos) __UserInput_leftArrow_(int cursorPos , int rcursorPos) {
+        cursorPos--;
+        rcursorPos--;
+
+        Console.SetCursorPosition(rcursorPos, Console.CursorTop);
+
+        return ( cursorPos , rcursorPos );
+    }
+
+    static (int cursorPos , int rcursorPos) __UserInput__SetBufferToMemory_(List<char> buffer , int msgLength , int cursorPos , int rcursorPos) {
+        string memory = Memory[PrevMemoryId];
+
+        Console.SetCursorPosition(msgLength, Console.CursorTop);
+        Console.Write(new string(' ', buffer.Count));
+        Console.SetCursorPosition(msgLength, Console.CursorTop);
+
+        buffer.Clear();
+        buffer.AddRange(memory);
+        Console.Write(memory);
+
+        cursorPos = buffer.Count;
+        rcursorPos = msgLength + cursorPos;
+
+        return (cursorPos, rcursorPos);
+    }
+
+    static string UserInput() { // Scary function, optimization needed.
         string msg = $"{UserName}@{UserDomainName} {Directory.GetCurrentDirectory().Replace($"/home/{UserName}", "~")} > ";
         Console.Write(msg);
         var buffer = new List<char>();
@@ -67,44 +102,15 @@ class Program {
 
                     // Console.Write($"r: {rcursorPos} , n: {cursorPos}");
                 } else if (key.Key == ConsoleKey.LeftArrow && rcursorPos >= cursorPos && cursorPos > 0) {
-                    cursorPos--;
-                    rcursorPos--;
-
-                    Console.SetCursorPosition(rcursorPos , Console.CursorTop);
+                    (cursorPos , rcursorPos) = __UserInput_leftArrow_(cursorPos , rcursorPos);
                 } else if (key.Key == ConsoleKey.RightArrow && rcursorPos >= cursorPos && cursorPos >= 0 && cursorPos < buffer.Count) {
-                    cursorPos++;
-                    rcursorPos++;
-
-                    Console.SetCursorPosition(rcursorPos , Console.CursorTop);
+                    (cursorPos , rcursorPos) = __UserInput_rightArrow_(cursorPos , rcursorPos);
                 } else if (key.Key == ConsoleKey.UpArrow && PrevMemoryId > 0) {
-                    string memory = Memory[PrevMemoryId];
-
-                    Console.SetCursorPosition(msg.Length, Console.CursorTop);
-                    Console.Write(new string(' ', buffer.Count));
-                    Console.SetCursorPosition(msg.Length, Console.CursorTop);
-
-                    buffer.Clear();
-                    buffer.AddRange(memory);
-
-                    Console.Write(memory);
-
-                    cursorPos = buffer.Count;
-                    rcursorPos = msg.Length + cursorPos;
+                    (cursorPos , rcursorPos) = __UserInput__SetBufferToMemory_(buffer, msg.Length , cursorPos , rcursorPos);
                     PrevMemoryId--;
                 } else if (key.Key == ConsoleKey.DownArrow && PrevMemoryId + 1 != Memory.Count) {
                     PrevMemoryId++;
-                    string memory = Memory[PrevMemoryId];
-
-                    Console.SetCursorPosition(msg.Length, Console.CursorTop);
-                    Console.Write(new string(' ', buffer.Count));
-                    Console.SetCursorPosition(msg.Length, Console.CursorTop);
-
-                    buffer.Clear();
-                    buffer.AddRange(memory);
-                    Console.Write(memory);
-
-                    cursorPos = buffer.Count;
-                    rcursorPos = msg.Length + cursorPos;
+                    (cursorPos , rcursorPos) = __UserInput__SetBufferToMemory_(buffer, msg.Length , cursorPos , rcursorPos);
                 }
                 else if (key.KeyChar != '\0' && key.Key != ConsoleKey.Backspace) {
                     buffer.Insert(cursorPos, key.KeyChar);
@@ -140,15 +146,19 @@ class Program {
             Log("Unknown directory/file!", "err");
             return;
         }
+        
+        try {
+            foreach (string item in Directory.EnumerateFileSystemEntries(input)) {
+                string output = item.Split("/")[^1];
 
-        foreach (string item in Directory.EnumerateFileSystemEntries(input)) {
-            string output = item.Split("/")[^1];
+                if (Directory.Exists(item)) {
+                    output = $"\u001b[1;34m{output}\u001b[0m";
+                }
 
-            if (Directory.Exists(item)) {
-                output = $"\u001b[1;34m{output}\u001b[0m";
+                Console.WriteLine(output);
             }
-
-            Console.WriteLine(output);
+        } catch (UnauthorizedAccessException) {
+            Log("Access denied.", "err");
         }
     }
 
