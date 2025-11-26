@@ -20,7 +20,8 @@ class Program {
         { "changedir" , "changedir:\nUsage: changedir <path>\nChange working directory."},
         { "echo" , "echo:\nUsage: echo <string>\nPrint desired string to the console."},
         { "read" , "read:\nUsage: read <path>\nRead the file contents."},
-        { "list" , "list:\nUsage: list <path>\nPrint the directory's entries." }
+        { "list" , "list:\nUsage: list <path>\nPrint the directory's entries." },
+        { "help" , "help:\nUsage: help <cmd>\nGet a tutorial on usage of given command."}
     };
 
     static List<string> Memory = [""];
@@ -161,14 +162,20 @@ class Program {
         Console.Write("\u001b[0m\n");
     }
 
-    
+    static bool CheckIfHelp(string cmd , string[] items) {
+        if (items.Contains("--help")) {
+            Log(CmdUsage[cmd], "nml");
+            return true;
+        }
+
+        return false;
+    }
+
     static void Echo(string input) {
         string[] items = input.Split();
 
-        if (items.Contains("--help")) {
-            Log(CmdUsage["echo"], "nml");
-            return;
-        }
+        if (CheckIfHelp("echo" , items)) return;
+
         Console.WriteLine(input);
     }
 
@@ -179,10 +186,7 @@ class Program {
     static void List(string input) {
         string[] items = input.Split();
 
-        if (items.Contains("--help")) {
-            Log(CmdUsage["list"], "nml");
-            return;
-        }
+        if (CheckIfHelp("list" , items)) return;
 
         if (input == "") {
             input = Directory.GetCurrentDirectory();
@@ -333,6 +337,22 @@ class Program {
         Console.WriteLine(File.ReadAllText(items.Last()));
     }
 
+    static void Help(string input) {
+        string[] items = input.Split();
+
+        if (items.Length == 1 && items[0] == "") {
+            Log(CmdUsage["help"], "nml");
+            return;
+        }
+
+        if (!CmdUsage.ContainsKey(items[0])) {
+            Log($"Cant find '{items[0]}' in the list of built in commands." , "err");
+            return;
+        }
+
+        Console.WriteLine(CmdUsage[items[0]]);
+    }
+
     static void ParseInput(string input) {
         Dictionary<string, Action> AvailableCommands = new() {
             { "echo" , () => Echo(CleanUpInput(input))},
@@ -344,6 +364,7 @@ class Program {
             { "append" , () => Append(CleanUpInput(input))},
             { "changedir" , () => Changedir(CleanUpInput(input)) },
             { "read" , () => Read(CleanUpInput(input)) },
+            { "help" , () => Help(CleanUpInput(input))}
         };
 
         if (input == "") {
