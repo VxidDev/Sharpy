@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 class Program {
     static bool IsDebug;
@@ -11,10 +12,12 @@ class Program {
     };
 
     static Dictionary<string, string> CmdUsage => new() {
-        { "append" , "append:\nUsage: append <filename> <content>" },
-        { "create" , "create:\nUsage: create <filename>" },
-        { "remove" , "remove:\nUsage: remove [--force] <filename>" },
-        { "changedir" , "changedir:\nUsage: changedir <path>"}
+        { "append" , "append:\nUsage: append <filename> <content>\nAppend string to the file." },
+        { "create" , "create:\nUsage: create <filename>\nCreate empty file." },
+        { "remove" , "remove:\nUsage: remove [--force] <filename>\nRemove file/directory." },
+        { "changedir" , "changedir:\nUsage: changedir <path>\nChange working directory."},
+        { "echo" , "echo:\nUsage: echo <string>\nPrint desired string to the console."},
+        { "read" , "read:\nUsage: read <path>\nRead the file contents."}
     };
 
     static List<string> Memory = [""];
@@ -128,8 +131,35 @@ class Program {
         PrevMemoryId = Memory.Count - 1;
         return new string([.. buffer]);
     }
+
+    static void PrintGradient(string text, bool bold , (int R, int G, int B) start, (int R, int G, int B) end) {
+        int len = text.Length;
+
+        if (bold) {
+            Console.Write("\u001b[1m");
+        }
+
+        for (int i = 0; i < len; i++) {
+            float t = (float)i / (len - 1);
+
+            int r = (int)(start.R + (end.R - start.R) * t);
+            int g = (int)(start.G + (end.G - start.G) * t);
+            int b = (int)(start.B + (end.B - start.B) * t);
+
+            Console.Write($"\u001b[38;2;{r};{g};{b}m{text[i]}");
+        }
+
+        Console.Write("\u001b[0m\n");
+    }
+
     
     static void Echo(string input) {
+        string[] items = input.Split();
+
+        if (items.Contains("--help")) {
+            Log(CmdUsage["echo"], "nml");
+            return;
+        }
         Console.WriteLine(input);
     }
 
@@ -152,10 +182,11 @@ class Program {
                 string output = item.Split("/")[^1];
 
                 if (Directory.Exists(item)) {
-                    output = $"\u001b[1;34m{output}\u001b[0m";
+                    PrintGradient(output , true , (153,204,255) , (77,77,255));
+                    continue;
                 }
 
-                Console.WriteLine(output);
+                Console.WriteLine($"\u001b[1m{output}\u001b[0m");
             }
         } catch (UnauthorizedAccessException) {
             Log("Access denied.", "err");
@@ -163,33 +194,34 @@ class Program {
     }
 
     static void Create(string input) {
-        string[] items = input.Split();
+        string[] items = input.Trim().Split();
 
-        // Console.WriteLine(items.Length);
-
-        if (items.Length == 1) {
+        if (items.Length == 1 && items[0] == "") {
             Log(CmdUsage["create"] , "nml");
             return;
         }
 
         bool isDir = false;
-        foreach (string item in items) {
-            if (item == "-d") {
-                isDir = true;
-                break;
-            }
-        }
+
+        if (items.Contains("-d")) isDir = true;
+
         if (!isDir) {
-            File.Create(items[^1]);
+            try {
+                var file = File.Create(items.Last());
+                file.Close();
+            } catch (ArgumentException) {
+                Log("Invalid arguments.", "err");
+            }
             return;
         }
-        Directory.CreateDirectory(items[^1]);
+
+        Directory.CreateDirectory(items.Last());
     }
 
     static void Remove(string input) {
         string[] items = input.Split();
 
-        if (items.Length == 1) {
+        if (items.Length == 1 && items[0] == "") {
             Log(CmdUsage["remove"] , "nml");
             return;
         }
@@ -248,7 +280,7 @@ class Program {
             return;
         }
 
-        File.AppendAllText(items[^2], items[^1]);
+        File.AppendAllText(items[^2], $"{items[^1]}\n");
     }
 
     static void Changedir(string input) {
@@ -269,6 +301,22 @@ class Program {
         Directory.SetCurrentDirectory(items[0]);
     }
 
+    static void Read(string input) {
+        string[] items = input.Split();
+
+        if (items.Length == 1 && items[0] == "") {
+            Log(CmdUsage["read"], "nml");
+            return;
+        }
+
+        if (!File.Exists(items.Last())) {
+            Log("File not found.", "err");
+            return;
+        }
+
+        Console.WriteLine(File.ReadAllText(items.Last()));
+    }
+
     static void ParseInput(string input) {
         Dictionary<string, Action> AvailableCommands = new() {
             { "echo" , () => Echo(CleanUpInput(input))},
@@ -278,7 +326,8 @@ class Program {
             { "create" , () => Create(CleanUpInput(input))},
             { "remove" , () => Remove(CleanUpInput(input))},
             { "append" , () => Append(CleanUpInput(input))},
-            { "changedir" , () => Changedir(CleanUpInput(input)) }
+            { "changedir" , () => Changedir(CleanUpInput(input)) },
+            { "read" , () => Read(CleanUpInput(input)) }
         };
 
         if (input == "") {
