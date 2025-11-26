@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Microsoft.VisualBasic.FileIO;
+using System.Reflection;
 
 class Program {
     static bool IsDebug;
@@ -17,7 +19,8 @@ class Program {
         { "remove" , "remove:\nUsage: remove [--force] <filename>\nRemove file/directory." },
         { "changedir" , "changedir:\nUsage: changedir <path>\nChange working directory."},
         { "echo" , "echo:\nUsage: echo <string>\nPrint desired string to the console."},
-        { "read" , "read:\nUsage: read <path>\nRead the file contents."}
+        { "read" , "read:\nUsage: read <path>\nRead the file contents."},
+        { "list" , "list:\nUsage: list <path>\nPrint the directory's entries." }
     };
 
     static List<string> Memory = [""];
@@ -81,6 +84,18 @@ class Program {
         return (cursorPos, rcursorPos);
     }
 
+    static (int cursorPos , int rcursorPos) UserInput__AddChar_(List<char> buffer , int cursorPos , int rcursorPos , char key) {
+        buffer.Insert(cursorPos, key);
+        cursorPos++;
+        
+        Console.SetCursorPosition(rcursorPos, Console.CursorTop);
+        Console.Write(new string([.. buffer.Skip(cursorPos - 1)]));
+        
+        rcursorPos++;
+
+        return (cursorPos, rcursorPos);
+    }
+
     static string UserInput() { // Scary function, optimization needed.
         string msg = $"{UserName}@{UserDomainName} {Directory.GetCurrentDirectory().Replace($"/home/{UserName}", "~")} > ";
         Console.Write(msg);
@@ -116,13 +131,7 @@ class Program {
                     (cursorPos , rcursorPos) = UserInput__SetBufferToMemory_(buffer, msg.Length);
                 }
                 else if (key.KeyChar != '\0' && key.Key != ConsoleKey.Backspace) {
-                    buffer.Insert(cursorPos, key.KeyChar);
-                    cursorPos++;
-                    
-                    Console.SetCursorPosition(rcursorPos, Console.CursorTop);
-                    Console.Write(new string([.. buffer.Skip(cursorPos - 1)]));
-                    
-                    rcursorPos++;
+                    (cursorPos, rcursorPos) = UserInput__AddChar_(buffer, cursorPos, rcursorPos, key.KeyChar);
                     Console.SetCursorPosition(msg.Length + cursorPos, Console.CursorTop);
                 }
             }
@@ -168,6 +177,13 @@ class Program {
     }
 
     static void List(string input) {
+        string[] items = input.Split();
+
+        if (items.Contains("--help")) {
+            Log(CmdUsage["list"], "nml");
+            return;
+        }
+
         if (input == "") {
             input = Directory.GetCurrentDirectory();
         };
@@ -327,7 +343,7 @@ class Program {
             { "remove" , () => Remove(CleanUpInput(input))},
             { "append" , () => Append(CleanUpInput(input))},
             { "changedir" , () => Changedir(CleanUpInput(input)) },
-            { "read" , () => Read(CleanUpInput(input)) }
+            { "read" , () => Read(CleanUpInput(input)) },
         };
 
         if (input == "") {
