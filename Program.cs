@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.VisualBasic.FileIO;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Data;
 
 class Program {
     static bool IsDebug = false;
@@ -25,7 +26,8 @@ class Program {
         { "read" , "read:\nUsage: read <path>\nRead the file contents."},
         { "list" , "list:\nUsage: list <path>\nPrint the directory's entries." },
         { "help" , "help:\nUsage: help <cmd>\nGet a tutorial on usage of given command."},
-        { "alias" , "alias:\nUsage: alias <name>=<command>"}
+        { "alias" , "alias:\nUsage: alias [--remove<name>/--get <name>/<name>=<command>]\nDefine your own shortcut."},
+        { "sdb" , "sdb\nUsage: sdb [--toggle]\nSharpy's debug commands."}
     };
 
     static List<string> Memory = [""];
@@ -344,6 +346,8 @@ class Program {
     static void Help(string input) {
         string[] items = input.Split();
 
+        if (CheckIfHelp("help" , items)) return;
+
         if (items.Length == 1 && items[0] == "") {
             Log(CmdUsage["help"], "nml");
             return;
@@ -429,6 +433,23 @@ class Program {
         }
     }
 
+    static void Sdb(string input) {
+        string[] items = input.Split();
+
+        if (items.Length == 1 && items[0] == "") {
+            Log(CmdUsage["sdb"], "nml");
+            return;
+        }
+
+        if (CheckIfHelp("sdb" , items)) return;
+
+        if (items.Contains("--toggle")) {
+            IsDebug = !IsDebug;
+            Log($"Debug: {IsDebug}" , "nml");
+            return;
+        }
+    }
+
     static void ParseInput(string input) {
         Dictionary<string, Action> AvailableCommands = new() {
             { "echo" , () => Echo(CleanUpInput(input))},
@@ -441,7 +462,8 @@ class Program {
             { "changedir" , () => Changedir(CleanUpInput(input)) },
             { "read" , () => Read(CleanUpInput(input)) },
             { "help" , () => Help(CleanUpInput(input))},
-            { "alias" , () => Alias(CleanUpInput(input))}
+            { "alias" , () => Alias(CleanUpInput(input))},
+            { "sdb" , () => Sdb(CleanUpInput(input))}
         };
 
         if (input == "") {
