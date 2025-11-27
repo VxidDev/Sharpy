@@ -5,13 +5,16 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Microsoft.VisualBasic.FileIO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 class Program {
-    static bool IsDebug;
+    static bool IsDebug = false;
     static Dictionary<string , Action> AvailableArgs => new() {
         { "-d" , () => { IsDebug = true; } },
         { "--debug" , () => { IsDebug = true; } }
     };
+
+    static Dictionary<string, string> Aliases = [];
 
     static Dictionary<string, string> CmdUsage => new() {
         { "append" , "append:\nUsage: append <filename> <content>\nAppend string to the file." },
@@ -21,7 +24,8 @@ class Program {
         { "echo" , "echo:\nUsage: echo <string>\nPrint desired string to the console."},
         { "read" , "read:\nUsage: read <path>\nRead the file contents."},
         { "list" , "list:\nUsage: list <path>\nPrint the directory's entries." },
-        { "help" , "help:\nUsage: help <cmd>\nGet a tutorial on usage of given command."}
+        { "help" , "help:\nUsage: help <cmd>\nGet a tutorial on usage of given command."},
+        { "alias" , "alias:\nUsage: alias <name>=<command>"}
     };
 
     static List<string> Memory = [""];
@@ -353,6 +357,78 @@ class Program {
         Console.WriteLine(CmdUsage[items[0]]);
     }
 
+    static void Alias(string input) {
+        string[] items = input.Split();
+
+        if (items.Length == 1 && items[0] == "") {
+            Log(CmdUsage["alias"], "nml");
+            return;
+        }
+
+        if (CheckIfHelp("alias" , items)) return;
+
+        if (items.Contains("--pAliases")) {
+            if (!IsDebug) {
+                Log("Debug required.", "err");
+                return;
+            }
+            foreach (string key in Aliases.Keys) {
+                Console.WriteLine($"{key} = {Aliases[key]}");
+            }
+            return;
+        }
+
+        if (items.Contains("--remove")) {
+            if (items.Length < 2) {
+                Log("Invalid arguments.", "err");
+                return;
+            }
+
+            string rmtarget = items[1];
+            
+            if (!Aliases.ContainsKey(rmtarget)) {
+                Log("Unknown alias.", "err");
+                return;
+            }
+
+            Aliases.Remove(rmtarget);
+            Log($"Alias '{rmtarget}' successfully removed.", "nml");
+            return;
+        }
+
+        if (items.Contains("--get")) {
+            try {
+                // Console.WriteLine(list[0]);
+                Console.WriteLine(Aliases[items[1]]);
+                return;
+            } catch (KeyNotFoundException) {
+                Log("Unknown alias.", "err");
+                return;
+            } catch (ArgumentOutOfRangeException) {
+                Log("Invalid arguments." , "err");
+                return;
+            }
+        }
+
+        try {
+            string[] alias = items[0].Split('=');
+            string key = alias[0];
+            string value = alias[1].Replace('+', ' ');
+            if (key == value) {
+                Log("Infinity recursion detected.", "wrn");
+            }
+            if (!Aliases.TryAdd(key, value)) {
+                Log("Alias already exists.", "err");
+                return;
+            }
+
+            Log($"Alias '{key}' successfully created.", "nml");
+        } catch (IndexOutOfRangeException) {
+            Log("Invalid arguments.", "err");
+            return;
+        }
+    }
+
     static void ParseInput(string input) {
         Dictionary<string, Action> AvailableCommands = new() {
             { "echo" , () => Echo(CleanUpInput(input))},
@@ -364,7 +440,8 @@ class Program {
             { "append" , () => Append(CleanUpInput(input))},
             { "changedir" , () => Changedir(CleanUpInput(input)) },
             { "read" , () => Read(CleanUpInput(input)) },
-            { "help" , () => Help(CleanUpInput(input))}
+            { "help" , () => Help(CleanUpInput(input))},
+            { "alias" , () => Alias(CleanUpInput(input))}
         };
 
         if (input == "") {
@@ -375,6 +452,10 @@ class Program {
             // Console.WriteLine(input.Split()[0]);
             AvailableCommands[input.Split()[0]]();
         } catch (KeyNotFoundException) {
+            if (Aliases.ContainsKey(input.Split()[0])) {
+                ParseInput(Aliases[input.Split()[0]]);
+                return;
+            }
             var parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             string program = parts[0];
             string args = string.Join(' ', parts.Skip(1));
