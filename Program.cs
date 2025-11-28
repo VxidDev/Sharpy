@@ -7,9 +7,13 @@ using Microsoft.VisualBasic.FileIO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Data;
+using System.Runtime.Serialization;
+using System.Runtime.Versioning;
+using System.Reflection.PortableExecutable;
 
 class Program {
     static bool IsDebug = false;
+    static bool IsSudo = Environment.IsPrivilegedProcess;
     static Dictionary<string , Action> AvailableArgs => new() {
         { "-d" , () => { IsDebug = true; } },
         { "--debug" , () => { IsDebug = true; } }
@@ -27,7 +31,9 @@ class Program {
         { "list" , "list:\nUsage: list <path>\nPrint the directory's entries." },
         { "help" , "help:\nUsage: help <cmd>\nGet a tutorial on usage of given command."},
         { "alias" , "alias:\nUsage: alias [--remove<name>/--get <name>/<name>=<command>]\nDefine your own shortcut."},
-        { "sdb" , "sdb\nUsage: sdb [--toggle]\nSharpy's debug commands."}
+        { "sdb" , "sdb\nUsage: sdb [--toggle]\nSharpy's debug commands."},
+        { "smod" , "smod\nUsage: smod [--toggle]\nEnable sudo mode."},
+        { "prompt" , "prompt\nUsage: prompt [--clear/<prompt>]\nChange prompt."}
     };
 
     static List<string> Memory = [""];
@@ -35,6 +41,7 @@ class Program {
 
     static string UserName => Environment.UserName;
     static string UserDomainName => Environment.UserDomainName;
+    static string prompt = "{userName}@{userDomainName} {currDir} {userStat} > ";
 
     static void Log(string text , string state) {
         Dictionary<string, string> colors = new() {
@@ -104,7 +111,17 @@ class Program {
     }
 
     static string UserInput() { // Scary function, optimization needed.
-        string msg = $"{UserName}@{UserDomainName} {Directory.GetCurrentDirectory().Replace($"/home/{UserName}", "~")} > ";
+        string userStat;
+        if (IsSudo) {
+            userStat = "#";
+        } else {
+            userStat = "$";
+        }
+        string msg = prompt
+            .Replace("{userName}", UserName)
+            .Replace("{userDomainName}", UserDomainName)
+            .Replace("{currDir}" , Environment.CurrentDirectory.Replace($"/home/{UserName}" , "~"))
+            .Replace("{userStat}" , userStat);
         Console.Write(msg);
         var buffer = new List<char>();
         int rcursorPos = msg.Length;
@@ -451,6 +468,29 @@ class Program {
             }
             return;
         }
+
+        if (items.Contains("isSudo")) {
+            Log($"Official: {Environment.IsPrivilegedProcess} Program: {IsSudo}" , "nml");
+        }
+    }
+
+    static void Prompt(string input) {
+        string[] items = input.Split();
+
+        if (items.Length == 0 && items[0] == "") {
+            Log(CmdUsage["prompt"], "nml");
+            return;
+        }
+
+        if (CheckIfHelp("prompt" , items)) return;
+
+        if (items.Contains("--clear")) {
+            prompt = "{userName}@{userDomainName} {currDir} {userStat} > ";
+            Log("Successfully cleared out the prompt.", "nml");
+            return;
+        }
+
+        prompt = items[0].Replace('+', ' ');
     }
 
     static void ParseInput(string input) {
@@ -466,7 +506,8 @@ class Program {
             { "read" , () => Read(CleanUpInput(input)) },
             { "help" , () => Help(CleanUpInput(input))},
             { "alias" , () => Alias(CleanUpInput(input))},
-            { "sdb" , () => Sdb(CleanUpInput(input))}
+            { "sdb" , () => Sdb(CleanUpInput(input))},
+            { "prompt" , () => Prompt(CleanUpInput(input)) }
         };
 
         if (input == "") {
