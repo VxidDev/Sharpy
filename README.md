@@ -169,6 +169,29 @@ sdb --toggle
 sdb pAliases
 ```
 
+11. prompt
+
+Edit existing prompt.
+
+## Usage
+```
+prompt <prompt>
+```
+
+## Example
+```
+prompt |{userStat}|+{userName}+{currDir}++>>
+```
+This turns prompt from this:
+```
+vxid-dev@VxidDev ~/Coding/sharpy $ >
+```
+To this:
+```
+|$| vxid-dev ~/Coding/sharpy  >>
+```
+Careful, you have to replace whitespace with '+'.
+
 ## Functions
 | Subcommand | Description                                    |
 | ---------- | ---------------------------------------------- |
