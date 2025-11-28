@@ -371,17 +371,6 @@ class Program {
 
         if (CheckIfHelp("alias" , items)) return;
 
-        if (items.Contains("--pAliases")) {
-            if (!IsDebug) {
-                Log("Debug required.", "err");
-                return;
-            }
-            foreach (string key in Aliases.Keys) {
-                Console.WriteLine($"{key} = {Aliases[key]}");
-            }
-            return;
-        }
-
         if (items.Contains("--remove")) {
             if (items.Length < 2) {
                 Log("Invalid arguments.", "err");
@@ -446,6 +435,20 @@ class Program {
         if (items.Contains("--toggle")) {
             IsDebug = !IsDebug;
             Log($"Debug: {IsDebug}" , "nml");
+            return;
+        }
+
+        if (items.Contains("pAliases")) {
+            if (!IsDebug) {
+                Log("Debug required.", "err");
+                return;
+            }
+            if (Aliases.Keys.Count == 0) {
+                Log(" -~- No aliases -~-", "nml");
+            }
+            foreach (string key in Aliases.Keys) {
+                Console.WriteLine($"{key} = {Aliases[key]}");
+            }
             return;
         }
     }
