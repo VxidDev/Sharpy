@@ -10,6 +10,9 @@ using System.Data;
 using System.Runtime.Serialization;
 using System.Runtime.Versioning;
 using System.Reflection.PortableExecutable;
+using System.Text.Json;
+using System.Net;
+using System.Security.Cryptography;
 
 class Program {
     static bool IsDebug = false;
@@ -42,6 +45,40 @@ class Program {
     static string UserName => Environment.UserName;
     static string UserDomainName => Environment.UserDomainName;
     static string prompt = "{userName}@{userDomainName} {currDir} {userStat} > ";
+    static string exportPath = $"/home/{UserName}/.sharpy";
+
+    static void CreateConfig() {
+        Directory.CreateDirectory($"{exportPath}");
+        var file = File.Create($"{exportPath}/config.json");
+        file.Close();
+        Dictionary<string, string> config = new() {
+            { "prompt" , prompt }
+        };
+        File.WriteAllText($"{exportPath}/config.json" , JsonSerializer.Serialize(config));
+    }
+
+    static Program() {
+        if (!File.Exists($"{exportPath}/config.json")) {
+            CreateConfig();
+        } else {
+            string? content = File.ReadAllText($"{exportPath}/config.json");
+            Dictionary<string, string>? data = JsonSerializer.Deserialize<Dictionary<string, string>>(content);
+            if (data is null) {
+                if (IsDebug) {
+                    Log("Failed to load data from config." , "err");
+                }
+                return;
+            }
+            data.TryGetValue("prompt" , out string? pprompt);
+            if (pprompt is null) {
+                if (IsDebug) {
+                    Log("Failed to get 'prompt' from config.", "err");
+                }
+                return;
+            }
+            prompt = pprompt;
+        }
+    }
 
     static void Log(string text , string state) {
         Dictionary<string, string> colors = new() {
@@ -215,11 +252,13 @@ class Program {
             input = Directory.GetCurrentDirectory();
         };
 
+        input = input.Replace("~", $"/home/{UserName}/");
+
         if (!Directory.Exists(input)) {
             Log("Unknown directory/file!", "err");
             return;
         }
-        
+
         try {
             foreach (string item in Directory.EnumerateFileSystemEntries(input)) {
                 string output = item.Split("/")[^1];
@@ -352,12 +391,14 @@ class Program {
             return;
         }
 
-        if (!File.Exists(items.Last())) {
+        var file = items.Last().Replace("~", "/home/vxid-dev/");
+
+        if (!File.Exists(file)) {
             Log("File not found.", "err");
             return;
         }
 
-        Console.WriteLine(File.ReadAllText(items.Last()));
+        Console.WriteLine(File.ReadAllText(file));
     }
 
     static void Help(string input) {
@@ -493,21 +534,50 @@ class Program {
         prompt = items[0].Replace('+', ' ');
     }
 
+    static void Export() {
+        // string[] items = input.Split();
+
+        string oldText = File.ReadAllText($"{exportPath}/config.json");
+        Dictionary<string, string>? oldData = null;
+        int tries = 0;
+        while (tries < 3) {
+            try {
+                tries++;
+                oldData = JsonSerializer.Deserialize<Dictionary<string, string>>(oldText!);
+                break;
+            }
+            catch (JsonException) {
+                CreateConfig();
+                return;
+            }
+        }
+
+        if (oldData is null) {
+            Log("Failed to update config." , "err");
+            return;
+        }
+
+        oldData["prompt"] = prompt;
+
+        File.WriteAllText($"{exportPath}/config.json", JsonSerializer.Serialize(oldData));
+    }
+
     static void ParseInput(string input) {
         Dictionary<string, Action> AvailableCommands = new() {
-            { "echo" , () => Echo(CleanUpInput(input))},
-            { "clear" , Console.Clear},
-            { "exit" , () => Environment.Exit(0)},
-            { "list" , () => List(CleanUpInput(input))},
-            { "create" , () => Create(CleanUpInput(input))},
-            { "remove" , () => Remove(CleanUpInput(input))},
-            { "append" , () => Append(CleanUpInput(input))},
+            { "echo" , () => Echo(CleanUpInput(input)) },
+            { "clear" , Console.Clear },
+            { "exit" , () => Environment.Exit(0) },
+            { "list" , () => List(CleanUpInput(input)) },
+            { "create" , () => Create(CleanUpInput(input)) },
+            { "remove" , () => Remove(CleanUpInput(input)) },
+            { "append" , () => Append(CleanUpInput(input)) },
             { "changedir" , () => Changedir(CleanUpInput(input)) },
             { "read" , () => Read(CleanUpInput(input)) },
-            { "help" , () => Help(CleanUpInput(input))},
-            { "alias" , () => Alias(CleanUpInput(input))},
-            { "sdb" , () => Sdb(CleanUpInput(input))},
-            { "prompt" , () => Prompt(CleanUpInput(input)) }
+            { "help" , () => Help(CleanUpInput(input)) },
+            { "alias" , () => Alias(CleanUpInput(input)) },
+            { "sdb" , () => Sdb(CleanUpInput(input)) },
+            { "prompt" , () => Prompt(CleanUpInput(input)) },
+            { "export" , Export }
         };
 
         if (input == "") {
