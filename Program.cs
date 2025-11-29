@@ -13,6 +13,7 @@ using System.Reflection.PortableExecutable;
 using System.Text.Json;
 using System.Net;
 using System.Security.Cryptography;
+using System.Security.AccessControl;
 
 class Program {
     static bool IsDebug = false;
@@ -36,7 +37,8 @@ class Program {
         { "alias" , "alias:\nUsage: alias [--remove<name>/--get <name>/<name>=<command>]\nDefine your own shortcut."},
         { "sdb" , "sdb\nUsage: sdb [--toggle]\nSharpy's debug commands."},
         { "smod" , "smod\nUsage: smod [--toggle]\nEnable sudo mode."},
-        { "prompt" , "prompt\nUsage: prompt [--clear/<prompt>]\nChange prompt."}
+        { "prompt" , "prompt\nUsage: prompt [--clear/<prompt>]\nChange prompt."},
+        { "export" , "export\nUsage: export\nExport your current data(prompt, aliases)."}
     };
 
     static List<string> Memory = [""];
@@ -62,21 +64,40 @@ class Program {
             CreateConfig();
         } else {
             string? content = File.ReadAllText($"{exportPath}/config.json");
-            Dictionary<string, string>? data = JsonSerializer.Deserialize<Dictionary<string, string>>(content);
+            Dictionary<string, object>? data = JsonSerializer.Deserialize<Dictionary<string, object>>(content);
             if (data is null) {
                 if (IsDebug) {
                     Log("Failed to load data from config." , "err");
                 }
                 return;
             }
-            data.TryGetValue("prompt" , out string? pprompt);
-            if (pprompt is null) {
+            data.TryGetValue("prompt" , out object? pprompt);
+            if (pprompt is null || pprompt.ToString() is null) {
                 if (IsDebug) {
                     Log("Failed to get 'prompt' from config.", "err");
                 }
                 return;
             }
-            prompt = pprompt;
+            prompt = pprompt.ToString()!;
+        } 
+        if (File.Exists($"{exportPath}/aliases.json")) {
+            string? aliasesData = File.ReadAllText($"{exportPath}/aliases.json");
+            if (aliasesData is null) {
+                if (IsDebug) {
+                    Log("Failed to load aliases.", "err");
+                }
+                return;
+            }
+            Dictionary<string, string>? aliases = JsonSerializer.Deserialize<Dictionary<string , string>>(aliasesData);
+            if (aliases is null) {
+                if (IsDebug) {
+                    Log("Failed to load aliases." , "err");
+                }
+                return;
+            }
+            Aliases = aliases;
+        } else {
+            File.Create($"{exportPath}/aliases.json").Close();
         }
     }
 
@@ -538,12 +559,12 @@ class Program {
         // string[] items = input.Split();
 
         string oldText = File.ReadAllText($"{exportPath}/config.json");
-        Dictionary<string, string>? oldData = null;
+        Dictionary<string, object>? oldData = null;
         int tries = 0;
         while (tries < 3) {
             try {
                 tries++;
-                oldData = JsonSerializer.Deserialize<Dictionary<string, string>>(oldText!);
+                oldData = JsonSerializer.Deserialize<Dictionary<string, object>>(oldText!);
                 break;
             }
             catch (JsonException) {
@@ -560,6 +581,34 @@ class Program {
         oldData["prompt"] = prompt;
 
         File.WriteAllText($"{exportPath}/config.json", JsonSerializer.Serialize(oldData));
+
+        tries = 0;
+        Dictionary<string, string>? oldAliases = null;
+        while (tries < 3) {
+            try {
+                tries++;
+                string? text = File.ReadAllText($"{exportPath}/aliases.json");
+                if (text is null) continue;
+                oldAliases = JsonSerializer.Deserialize<Dictionary<string, string>>(text);
+            } catch (JsonException) {
+                File.Create($"{exportPath}/aliases.json").Close();
+                File.WriteAllText($"{exportPath}/aliases.json", JsonSerializer.Serialize<Dictionary<string, string>>([]));
+            } catch (FileNotFoundException) {
+                File.Create($"{exportPath}/aliases.json").Close();
+                File.WriteAllText($"{exportPath}/aliases.json", JsonSerializer.Serialize<Dictionary<string, string>>([]));
+            }
+        }
+
+        if (oldAliases is null) {
+            if (IsDebug) {
+                Log("Failed to export aliases.", "err");
+            }
+            return;
+        }
+
+        oldAliases = Aliases;
+
+        File.WriteAllText($"{exportPath}/aliases.json", JsonSerializer.Serialize(oldAliases));
     }
 
     static void ParseInput(string input) {
