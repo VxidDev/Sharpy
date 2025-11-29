@@ -168,6 +168,13 @@ sdb
 sdb --toggle
 sdb pAliases
 ```
+## Functions
+| Subcommand | Description                                    |
+| ---------- | ---------------------------------------------- |
+| `--toggle` | Enable/disable debug mode                      |
+| `pAliases` | Print all aliases (only when debug mode is ON) |
+| `isSudo`   | Print current sudo status                      |
+| `pDebug`   | Print current debug status                     |
 
 11. prompt
 
@@ -175,7 +182,7 @@ Edit existing prompt.
 
 ## Usage
 ```
-prompt <prompt>
+prompt [--clear] <prompt>
 ```
 
 ## Example
@@ -192,11 +199,18 @@ To this:
 ```
 Careful, you have to replace whitespace with '+'.
 
-## Functions
-| Subcommand | Description                                    |
-| ---------- | ---------------------------------------------- |
-| `--toggle` | Enable/disable debug mode                      |
-| `pAliases` | Print all aliases (only when debug mode is ON) |
+12. export
+
+Export aliases and current prompt.
+
+## Usage
+```
+export
+```
+...Pretty self explanatory right?
+
+All data is stored within ```/home/<username>/.sharpy``` folder.
+
 ## ⌨️ Line Editor Features
 
 Sharpy uses a custom input system, instead of generic Console.ReadLine() we use:
