@@ -167,6 +167,9 @@ alias --remove ll
 sdb
 sdb --toggle
 sdb pAliases
+sdb pHistory
+sdb isSudo
+sdb pDebug
 ```
 ## Functions
 | Subcommand | Description                                    |
@@ -175,6 +178,7 @@ sdb pAliases
 | `pAliases` | Print all aliases (only when debug mode is ON) |
 | `isSudo`   | Print current sudo status                      |
 | `pDebug`   | Print current debug status                     |
+| `pHistory` | Print current history entries to terminal.     |
 
 11. prompt
 
@@ -210,6 +214,36 @@ export
 ...Pretty self explanatory right?
 
 All data is stored within ```/home/<username>/.sharpy``` folder.
+
+13. history
+
+Manipulate the command history.
+
+## Usage
+```
+history [--clear/--pop <amount(int)>]
+```
+## Example:
+```
+vxid-dev@VxidDev ~/Coding/C# - Basics/sharpy $ > sdb pHistory
+[ID: 0] 
+[ID: 1] a
+[ID: 2] b
+[ID: 3] c
+[ID: 4] sdb pHistory
+PrevMemoryID: 4
+vxid-dev@VxidDev ~/Coding/C# - Basics/sharpy $ > history --pop 5
+vxid-dev@VxidDev ~/Coding/C# - Basics/sharpy $ > sdb pHistory
+[ID: 0] sdb pHistory
+PrevMemoryID: 0
+```
+## Functions
+
+| Subcommand | Description                                                    |
+| ---------- | ---------------------------------------------------------------|
+| `--clear`  | Remove all history entries.                                    |
+| `--pop <int>`    | Remove desired amount of entries from the end of entries.|
+
 
 ## ⌨️ Line Editor Features
 
