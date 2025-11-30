@@ -10,7 +10,7 @@ namespace Sharpy;
 
 class Program {
     static bool IsDebug = false;
-    static bool IsSudo = Environment.IsPrivilegedProcess;
+    static bool IsSudo => Environment.IsPrivilegedProcess;
     static Dictionary<string , Action> AvailableArgs => new() {
         { "-d" , () => { IsDebug = true; } },
         { "--debug" , () => { IsDebug = true; } }
