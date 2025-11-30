@@ -114,53 +114,6 @@ class Program {
         }
     }
 
-    static (int cursorPos , int rcursorPos) UserInput_rightArrow_(int cursorPos , int rcursorPos) {
-        cursorPos++;
-        rcursorPos++;
-
-        Console.SetCursorPosition(rcursorPos, Console.CursorTop);
-
-        return ( cursorPos , rcursorPos );
-    }
-
-    static (int cursorPos , int rcursorPos) UserInput_leftArrow_(int cursorPos , int rcursorPos) {
-        cursorPos--;
-        rcursorPos--;
-
-        Console.SetCursorPosition(rcursorPos, Console.CursorTop);
-
-        return ( cursorPos , rcursorPos );
-    }
-
-    static (int cursorPos , int rcursorPos) UserInput__SetBufferToMemory_(List<char> buffer , int msgLength) {
-        string memory = Memory[PrevMemoryId];
-
-        Console.SetCursorPosition(msgLength, Console.CursorTop);
-        Console.Write(new string(' ', buffer.Count));
-        Console.SetCursorPosition(msgLength, Console.CursorTop);
-
-        buffer.Clear();
-        buffer.AddRange(memory);
-        Console.Write(memory);
-
-        int cursorPos = buffer.Count;
-        int rcursorPos = msgLength + cursorPos;
-
-        return (cursorPos, rcursorPos);
-    }
-
-    static (int cursorPos , int rcursorPos) UserInput__AddChar_(List<char> buffer , int cursorPos , int rcursorPos , char key) {
-        buffer.Insert(cursorPos, key);
-        cursorPos++;
-        
-        Console.SetCursorPosition(rcursorPos, Console.CursorTop);
-        Console.Write(new string([.. buffer.Skip(cursorPos - 1)]));
-        
-        rcursorPos++;
-
-        return (cursorPos, rcursorPos);
-    }
-
     static bool CheckIfHelp(string cmd , string[] items) {
         if (items.Contains("--help")) {
             Log(CmdUsage[cmd], "nml");
@@ -174,7 +127,7 @@ class Program {
         return string.Join(" ", input.Split()[1..]);
     }
 
-    static void ParseInput(string input) {
+    public static void ParseInput(string input) {
         Dictionary<string, Action> AvailableCommands = new() {
             { "echo" , () => Sharpy.Commands.Echo.Run(CleanUpInput(input) , CheckIfHelp) },
             { "clear" , Console.Clear },
@@ -190,7 +143,8 @@ class Program {
             { "sdb" , () => { IsDebug = Sharpy.Shell.Sdb.Run(CleanUpInput(input) , Log , CheckIfHelp , IsDebug , Aliases , IsSudo , CmdUsage , Memory , PrevMemoryId); } },
             { "prompt" , () => { prompt = Sharpy.Shell.Prompt.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp , prompt); } },
             { "export" , () => Sharpy.Shell.Export.Run(ExportPath , CreateConfig , Log , prompt , IsDebug , Aliases) },
-            { "history" , () => { (Memory , PrevMemoryId) = Sharpy.Shell.History.Run(CleanUpInput(input) , Memory , PrevMemoryId , Log , CmdUsage , CheckIfHelp); } }
+            { "history" , () => { (Memory , PrevMemoryId) = Sharpy.Shell.History.Run(CleanUpInput(input) , Memory , PrevMemoryId , Log , CmdUsage , CheckIfHelp); } },
+            { "time" , () => { Sharpy.Commands.Time.Run(CleanUpInput(input) , Log); } }
         };
 
         if (input == "") {
