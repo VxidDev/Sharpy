@@ -31,7 +31,7 @@ username@domain ~/current/path >
 
 ### External command fallback (ls, nano, python3, etc.)
 
-### Debug mode toggle (sdb --toggle)
+### Debug mode tool (sdb)
 
 ## 📦 Installation
 ```
