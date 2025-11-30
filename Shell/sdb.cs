@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Sharpy.Shell;
 
 static class Sdb {
-    public static bool Run(string input , Action<string , string> Log , Func<string , string[] , bool> CheckIfHelp , bool IsDebug , Dictionary<string , string> Aliases , bool IsSudo , Dictionary<string , string> CmdUsage) {
+    public static bool Run(string input , Action<string , string> Log , Func<string , string[] , bool> CheckIfHelp , bool IsDebug , Dictionary<string , string> Aliases , bool IsSudo , Dictionary<string , string> CmdUsage , List<string> Memory , int PrevMemoryId) {
         string[] items = input.Split();
 
         if (items.Length == 1 && items[0] == "") {
@@ -43,6 +43,14 @@ static class Sdb {
 
         if (items.Contains("isSudo")) {
             Log($"Official: {Environment.IsPrivilegedProcess} | Program: {IsSudo}" , "nml");
+            return IsDebug;
+        }
+        if (items.Contains("pHistory")) {
+            for (int i = 0; i < Memory.Count; i++) {
+                Console.WriteLine($"[ID: {i}] {Memory[i]}");
+            }
+            Console.WriteLine($"PrevMemoryID: {PrevMemoryId}");
+            return IsDebug;
         }
 
         return IsDebug;
