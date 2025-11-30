@@ -28,10 +28,10 @@ class Program {
         { "list" , "list:\nUsage: list <path>\nPrint the directory's entries." },
         { "help" , "help:\nUsage: help <cmd>\nGet a tutorial on usage of given command."},
         { "alias" , "alias:\nUsage: alias [--remove<name>/--get <name>/<name>=<command>]\nDefine your own shortcut."},
-        { "sdb" , "sdb\nUsage: sdb [--toggle]\nSharpy's debug commands."},
-        { "smod" , "smod\nUsage: smod [--toggle]\nEnable sudo mode."},
+        { "sdb" , "sdb\nUsage: sdb [--toggle/pAliases/pDebug/isSudo/pHistory]\nSharpy's debug commands."},
         { "prompt" , "prompt\nUsage: prompt [--clear/<prompt>]\nChange prompt."},
-        { "export" , "export\nUsage: export\nExport your current data(prompt, aliases)."}
+        { "export" , "export\nUsage: export\nExport your current data(prompt, aliases)."},
+        { "history" , "history\nUsage: history [--clear/--pop <amount(int)>]\nManipulate the command history."}
     };
 
     static List<string> Memory = [""];
@@ -187,9 +187,10 @@ class Program {
             { "read" , () => Sharpy.Commands.Read.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp) },
             { "help" , () => Sharpy.Commands.Help.Run(CleanUpInput(input) , CheckIfHelp , Log , CmdUsage) },
             { "alias" , () => { Aliases = Sharpy.Shell.Alias.Run(CleanUpInput(input) , Log , CheckIfHelp , CmdUsage , Aliases); } },
-            { "sdb" , () => { IsDebug = Sharpy.Shell.Sdb.Run(CleanUpInput(input) , Log , CheckIfHelp , IsDebug , Aliases , IsSudo , CmdUsage); } },
+            { "sdb" , () => { IsDebug = Sharpy.Shell.Sdb.Run(CleanUpInput(input) , Log , CheckIfHelp , IsDebug , Aliases , IsSudo , CmdUsage , Memory , PrevMemoryId); } },
             { "prompt" , () => { prompt = Sharpy.Shell.Prompt.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp , prompt); } },
-            { "export" , () => Sharpy.Shell.Export.Run(ExportPath , CreateConfig , Log , prompt , IsDebug , Aliases) }
+            { "export" , () => Sharpy.Shell.Export.Run(ExportPath , CreateConfig , Log , prompt , IsDebug , Aliases) },
+            { "history" , () => { (Memory , PrevMemoryId) = Sharpy.Shell.History.Run(CleanUpInput(input) , Memory , PrevMemoryId , Log , CmdUsage , CheckIfHelp); } }
         };
 
         if (input == "") {
