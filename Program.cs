@@ -57,6 +57,10 @@ class Program {
             CreateConfig();
         } else {
             string? content = File.ReadAllText($"{ExportPath}/config.json");
+            if (content is null || string.IsNullOrWhiteSpace(content)) {
+                CreateConfig();
+                content = File.ReadAllText($"{ExportPath}/config.json");
+            }
             Dictionary<string, object>? data = JsonSerializer.Deserialize<Dictionary<string, object>>(content);
             if (data is null) {
                 if (IsDebug) {
@@ -75,7 +79,7 @@ class Program {
         } 
         if (File.Exists($"{ExportPath}/aliases.json")) {
             string? aliasesData = File.ReadAllText($"{ExportPath}/aliases.json");
-            if (aliasesData is null) {
+            if (aliasesData is null || string.IsNullOrWhiteSpace(aliasesData)) {
                 if (IsDebug) {
                     Log("Failed to load aliases.", "err");
                 }
