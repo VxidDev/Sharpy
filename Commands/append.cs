@@ -13,8 +13,10 @@ static class Append {
             return;
         }
 
-        if (CheckIfHelp("run" , items)) return;
+        if (CheckIfHelp("append" , items)) return;
+        
+        string text = string.Join(' ' , items.Skip(1));
 
-        File.AppendAllText(items[^2], $"{items[^1]}\n");
+        File.AppendAllText(items[0], $"{text}\n");
     }
 }

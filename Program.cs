@@ -145,7 +145,7 @@ class Program {
             { "list" , () => Sharpy.Commands.List.Run(CleanUpInput(input) , CheckIfHelp , UserName , Log , Sharpy.Helpers.PrintGradient.Run) },
             { "create" , () => Sharpy.Commands.Create.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp) },
             { "remove" , () => Sharpy.Commands.Remove.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp) },
-            { "append" , () => Sharpy.Commands.Changedir.Run(CleanUpInput(input) , Log , CmdUsage , UserName , CheckIfHelp) },
+            { "append" , () => Sharpy.Commands.Append.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp) },
             { "changedir" , () => Sharpy.Commands.Changedir.Run(CleanUpInput(input) , Log , CmdUsage , UserName , CheckIfHelp) },
             { "read" , () => Sharpy.Commands.Read.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp) },
             { "help" , () => Sharpy.Commands.Help.Run(CleanUpInput(input) , CheckIfHelp , Log , CmdUsage) },
