@@ -46,8 +46,8 @@ static class Interpretator {
             if (line.StartsWith("asv")) {
                 if (!AssignVar(Vars , line)) {
                     Console.WriteLine($"SScript: Syntax error @ line: {currLine}\nasv <varName> <varValue>");
+                    return;
                 }
-                return;
             }
             Sharpy.Program.ParseInput(line);
         }
