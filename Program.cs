@@ -17,6 +17,7 @@ class Program {
     };
 
     static Dictionary<string, string> Aliases = [];
+    static Dictionary<string, string> Variables = [];
 
     static Dictionary<string, string> CmdUsage => new() {
         { "append" , "append:\nUsage: append <filename> <content>\nAppend string to the file." },
@@ -31,7 +32,8 @@ class Program {
         { "sdb" , "sdb\nUsage: sdb [--toggle/pAliases/pDebug/isSudo/pHistory]\nSharpy's debug commands."},
         { "prompt" , "prompt\nUsage: prompt [--clear/<prompt>]\nChange prompt."},
         { "export" , "export\nUsage: export\nExport your current data(prompt, aliases)."},
-        { "history" , "history\nUsage: history [--clear/--pop <amount(int)>]\nManipulate the command history."}
+        { "history" , "history\nUsage: history [--clear/--pop <amount(int)>]\nManipulate the command history."},
+        { "sscript" , "sscript\nUsage: sscript <file>\nExecute your SharpyScript file."}
     };
 
     static List<string> Memory = [""];
@@ -132,8 +134,12 @@ class Program {
     }
 
     public static void ParseInput(string input) {
+        if (input == "") {
+            return;
+        }
+
         Dictionary<string, Action> AvailableCommands = new() {
-            { "echo" , () => Sharpy.Commands.Echo.Run(CleanUpInput(input) , CheckIfHelp) },
+            { "echo" , () => Sharpy.Commands.Echo.Run(CleanUpInput(input) , CheckIfHelp , Variables , Log) },
             { "clear" , Console.Clear },
             { "exit" , () => Environment.Exit(0) },
             { "list" , () => Sharpy.Commands.List.Run(CleanUpInput(input) , CheckIfHelp , UserName , Log , Sharpy.Helpers.PrintGradient.Run) },
@@ -148,12 +154,10 @@ class Program {
             { "prompt" , () => { prompt = Sharpy.Shell.Prompt.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp , prompt); } },
             { "export" , () => Sharpy.Shell.Export.Run(ExportPath , CreateConfig , Log , prompt , IsDebug , Aliases) },
             { "history" , () => { (Memory , PrevMemoryId) = Sharpy.Shell.History.Run(CleanUpInput(input) , Memory , PrevMemoryId , Log , CmdUsage , CheckIfHelp); } },
-            { "time" , () => { Sharpy.Commands.Time.Run(CleanUpInput(input) , Log); } }
+            { "time" , () => { Sharpy.Commands.Time.Run(CleanUpInput(input) , Log); } },
+            { "sscript" , () => { Sharpy.SharpyScript.Interpretator.Run(CleanUpInput(input) , Log , IsDebug , CmdUsage , CheckIfHelp , Variables); }}, 
+            { "asv" , () => { Sharpy.SharpyScript.Interpretator.AssignVar(Variables , input); }}
         };
-
-        if (input == "") {
-            return;
-        }
 
         try {
             // Console.WriteLine(input.Split()[0]);
