@@ -1,5 +1,7 @@
 using System;
 using System.Diagnostics.SymbolStore;
+using System.Collections.Generic;
+
 namespace Sharpy.Commands;
 static class Echo {
     public static void Run(string input , Func<string , string[] , bool> CheckIfHelp , Dictionary<string , string> Vars , Action<string , string> Log) {
@@ -12,6 +14,12 @@ static class Echo {
         if (items.Contains("--var") || items.Contains("-v")) isVar = true;
 
         if (isVar) {
+
+            if (items.Length == 1) {
+                Console.WriteLine("");
+                return;
+            }
+
             if (!Vars.ContainsKey(items[1])) {
                 Log("Unknown Variable.", "err");
                 return;
