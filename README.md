@@ -1,12 +1,14 @@
 # Sharpy — Interactive Terminal Shell (C#)
 
-### Sharpy is a lightweight, interactive shell written in C#, offering basic filesystem operations, command aliases, debugging utilities, and a custom line-editor with history navigation.
+### Sharpy is a lightweight, interactive shell written in C#, offering basic filesystem operations, command aliases, debugging utilities, and a custom line-editor with history navigation. Sharpy also has its own scripting language(limited)!
 
 ## This README documents:
 
 - Installation / build steps
 
 - CLI arguments
+
+- Scripting Language
 
 - Built-in commands with examples
 
@@ -44,6 +46,45 @@ make build
 | --------- | ----------------- |
 | `-d`      | Enable debug mode |
 | `--debug` | Enable debug mode |
+
+## Scripting Language(SharpyScript)
+
+Language is pretty limited for now , but you can use it by create a .ss file and entering sharpy's commands and running it in shell via ```sscript <file>```
+
+### Example:
+tkinterTemplate.ss
+```
+echo Creating a Hello World in C#...
+
+create test.cs
+append test.cs using System;
+append test.cs static class Program {
+append test.cs static void Main() {
+append test.cs Console.WriteLine("Hello World!");
+append test.cs }
+append test.cs }
+
+echo Done!
+```
+This create a test.cs with this content:
+```
+using System;
+static class Program {
+static void Main() {
+Console.WriteLine("Hello World!");
+}
+}
+```
+theres also ```asv``` which means ASsignVariable
+```
+asv var 5
+echo -v var
+```
+output:
+```
+5
+```
+
 ## 📚 Built-in Commands
 
 Each command supports --help to print usage.
@@ -58,11 +99,11 @@ help list
 ```
 1. echo
 
-- Print a string.
+- Print a string or variable.
 
 ### Usage
 ```
-echo <string>
+echo [-v/--var] <string>
 ```
 
 2. list
