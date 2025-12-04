@@ -84,6 +84,21 @@ output:
 ```
 5
 ```
+theres also ```if```
+```
+if <logic <var> <var> <alias/command>
+```
+
+Example:
+```
+asv arg1 5
+asv arg2 5
+
+if equals arg1 arg2 echo hello world
+```
+
+Current logics available:
+- equals
 
 ## 📚 Built-in Commands
 
