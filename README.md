@@ -86,7 +86,7 @@ output:
 ```
 theres also ```if```
 ```
-if <logic <var> <var> <alias/command>
+if <logic> <var> <var> <alias/command>
 ```
 
 Example:
