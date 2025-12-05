@@ -52,7 +52,7 @@ make build
 Language is pretty limited for now , but you can use it by create a .ss file and entering sharpy's commands and running it in shell via ```sscript <file>```
 
 ### Example:
-tkinterTemplate.ss
+HelloWorld.ss
 ```
 echo Creating a Hello World in C#...
 
