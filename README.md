@@ -300,6 +300,35 @@ PrevMemoryID: 0
 | `--clear`  | Remove all history entries.                                    |
 | `--pop <int>`    | Remove desired amount of entries from the end of entries.|
 
+14. whoami
+
+print current user
+
+## Usage:
+```
+whoami
+```
+
+example output:
+```vxid-dev```
+
+15. currdir
+
+print current working directory
+
+## Usage:
+```
+currdir
+```
+
+16. makedir
+
+make a directory.
+
+## Usage:
+```
+makedir <dirName>
+```
 
 ## ⌨️ Line Editor Features
 
