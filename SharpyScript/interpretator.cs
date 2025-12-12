@@ -6,8 +6,13 @@ using System.Security.AccessControl;
 namespace Sharpy.SharpyScript;
 
 static class Interpretator {
-    public static bool AssignVar(Dictionary<string , string> Vars , string line) {
+    public static bool AssignVar(Dictionary<string , string> Vars , string line , Dictionary<string , string> CmdUsage , Action<string, string> Log) {
         string[] items = line.Split();
+        
+        if (items.Contains("--help") || items.Contains("-h")) {
+            Log(CmdUsage["asv"], "nml");
+            return true;
+        }
 
         if (items.Length != 3) {
             return false;
@@ -78,7 +83,7 @@ static class Interpretator {
             if (string.IsNullOrWhiteSpace(line) || line.StartsWith("//")) continue;
 
             if (line.StartsWith("asv")) {
-                if (!AssignVar(Vars , line)) {
+                if (!AssignVar(Vars , line , CmdUsage , Log)) {
                     Console.WriteLine($"SScript: Syntax error @ line: {currLine}\nasv <varName> <varValue>");
                     return;
                 }

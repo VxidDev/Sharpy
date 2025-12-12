@@ -24,7 +24,7 @@ class Program {
         { "create" , "create:\nUsage: create <filename>\nCreate empty file." },
         { "remove" , "remove:\nUsage: remove [--force] <filename>\nRemove file/directory." },
         { "changedir" , "changedir:\nUsage: changedir <path>\nChange working directory."},
-        { "echo" , "echo:\nUsage: echo <string>\nPrint desired string to the console."},
+        { "echo" , "echo:\nUsage: echo [--var/-v] <string>\nPrint desired string to the console."},
         { "read" , "read:\nUsage: read <path>\nRead the file contents."},
         { "list" , "list:\nUsage: list <path>\nPrint the directory's entries." },
         { "help" , "help:\nUsage: help <cmd>\nGet a tutorial on usage of given command."},
@@ -33,7 +33,11 @@ class Program {
         { "prompt" , "prompt\nUsage: prompt [--clear/<prompt>]\nChange prompt."},
         { "export" , "export\nUsage: export\nExport your current data(prompt, aliases)."},
         { "history" , "history\nUsage: history [--clear/--pop <amount(int)>]\nManipulate the command history."},
-        { "sscript" , "sscript\nUsage: sscript <file>\nExecute your SharpyScript file."}
+        { "sscript" , "sscript\nUsage: sscript <file>\nExecute your SharpyScript file."},
+        { "asv" , "asv\nUsage: asv <varName> <varValue>\nAssign a variable."},
+        { "currdir" , "currdir\nUsage: currdir\nPrint current working directory."},
+        { "whoami" , "whoami\nUsage: whoami\nPrint current user."},
+        { "makedir" , "makedir\nUsage: makedir <directoryName>\nCreate a directory."}
     };
 
     static List<string> Memory = [""];
@@ -156,7 +160,10 @@ class Program {
             { "history" , () => { (Memory , PrevMemoryId) = Sharpy.Shell.History.Run(CleanUpInput(input) , Memory , PrevMemoryId , Log , CmdUsage , CheckIfHelp); } },
             { "time" , () => { Sharpy.Commands.Time.Run(CleanUpInput(input) , Log); } },
             { "sscript" , () => { Sharpy.SharpyScript.Interpretator.Run(CleanUpInput(input) , Log , IsDebug , CmdUsage , CheckIfHelp , Variables); }}, 
-            { "asv" , () => { Sharpy.SharpyScript.Interpretator.AssignVar(Variables , input); }}
+            { "asv" , () => { Sharpy.SharpyScript.Interpretator.AssignVar(Variables , input , CmdUsage , Log); }},
+            { "whoami" , () => { Sharpy.Commands.WhoAmI.Run(UserName); }},
+            { "currdir" , () => { Sharpy.Commands.CurrDir.Run(Log); }},
+            { "makedir" , () => { Sharpy.Commands.MakeDir.Run(CleanUpInput(input) , CheckIfHelp , Log , CmdUsage); }}
         };
 
         try {
