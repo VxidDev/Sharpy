@@ -5,7 +5,7 @@ using System.Linq;
 namespace Sharpy.Shell;
 
 static class Prompt {
-    public static string Run(string input , Action<string , string> Log , Dictionary<string , string> CmdUsage , Func<string , string[] , bool> CheckIfHelp , string prompt) {
+    public static string Run(string input , Action<string , string> Log , Dictionary<string , string> CmdUsage , Func<string , string[] , bool> CheckIfHelp , string prompt , Dictionary<string , string> Variables) {
         string[] items = input.Split();
 
         if (items.Length == 0 && items[0] == "") {
@@ -22,6 +22,7 @@ static class Prompt {
         }
 
         prompt = items[0].Replace('+', ' ');
+        Variables["$PROMPT"] = prompt;
         return prompt;
     }
 }

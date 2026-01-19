@@ -17,7 +17,6 @@ class Program {
     };
 
     static Dictionary<string, string> Aliases = [];
-    static Dictionary<string, string> Variables = [];
 
     static Dictionary<string, string> CmdUsage => new() {
         { "append" , "append:\nUsage: append <filename> <content>\nAppend string to the file." },
@@ -47,6 +46,12 @@ class Program {
     static string UserDomainName => Environment.UserDomainName;
     static string prompt = "{userName}@{userDomainName} {currDir} {userStat} > ";
     static string ExportPath => $"/home/{UserName}/.sharpy";
+
+    static Dictionary<string, string> Variables = new() {
+        {"$USER" , UserName},
+        {"$PROMPT" , prompt},
+        {"$HOST" , UserDomainName}
+    };
 
     static void CreateConfig() {
         Directory.CreateDirectory($"{ExportPath}");
@@ -155,7 +160,7 @@ class Program {
             { "help" , () => Sharpy.Commands.Help.Run(CleanUpInput(input) , CheckIfHelp , Log , CmdUsage) },
             { "alias" , () => { Aliases = Sharpy.Shell.Alias.Run(CleanUpInput(input) , Log , CheckIfHelp , CmdUsage , Aliases); } },
             { "sdb" , () => { IsDebug = Sharpy.Shell.Sdb.Run(CleanUpInput(input) , Log , CheckIfHelp , IsDebug , Aliases , IsSudo , CmdUsage , Memory , PrevMemoryId); } },
-            { "prompt" , () => { prompt = Sharpy.Shell.Prompt.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp , prompt); } },
+            { "prompt" , () => { prompt = Sharpy.Shell.Prompt.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp , prompt , Variables); } },
             { "export" , () => Sharpy.Shell.Export.Run(ExportPath , CreateConfig , Log , prompt , IsDebug , Aliases) },
             { "history" , () => { (Memory , PrevMemoryId) = Sharpy.Shell.History.Run(CleanUpInput(input) , Memory , PrevMemoryId , Log , CmdUsage , CheckIfHelp); } },
             { "time" , () => { Sharpy.Commands.Time.Run(CleanUpInput(input) , Log); } },
