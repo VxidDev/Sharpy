@@ -84,6 +84,15 @@ output:
 ```
 5
 ```
+
+there's also default variables.
+
+| Variable | What Holds |
+| -------- | ---------- |
+| $USER    | Username   |
+| $HOST    | Hostname   |
+| $PROMPT  | Prompt(raw)|
+
 theres also ```if```
 ```
 if <logic> <var> <var> <alias/command>
