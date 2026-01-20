@@ -91,7 +91,8 @@ there's also default variables.
 | -------- | ---------- |
 | $USER    | Username   |
 | $HOST    | Hostname   |
-| $PROMPT  | Prompt(raw)|
+| $PROMPT  | Prompt (raw)|
+| $TIME    | Current time (HH:mm:ss)| 
 
 theres also ```if```
 ```
