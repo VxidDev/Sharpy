@@ -93,6 +93,7 @@ there's also default variables.
 | $HOST    | Hostname   |
 | $PROMPT  | Prompt (raw)|
 | $TIME    | Current time (HH:mm:ss)| 
+| $DATE    | Current date (MM:dd:yy)|
 
 theres also ```if```
 ```
