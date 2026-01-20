@@ -50,7 +50,8 @@ class Program {
     static Dictionary<string, string> Variables = new() {
         {"$USER" , UserName},
         {"$PROMPT" , prompt},
-        {"$HOST" , UserDomainName}
+        {"$HOST" , UserDomainName},
+        {"$TIME" , DateTime.Now.ToString("HH:mm:ss")}
     };
 
     static void CreateConfig() {
@@ -202,6 +203,8 @@ class Program {
         ParseArgs(args);
 
         while (true) {
+            Variables["$TIME"] = DateTime.Now.ToString("HH:mm:ss");
+
             (string input , PrevMemoryId , Memory) = Sharpy.Helpers.UserInput.Run(prompt , UserName , UserDomainName , IsSudo , PrevMemoryId , Memory);
             ParseInput(input);
         }
