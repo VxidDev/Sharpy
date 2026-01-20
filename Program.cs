@@ -51,7 +51,8 @@ class Program {
         {"$USER" , UserName},
         {"$PROMPT" , prompt},
         {"$HOST" , UserDomainName},
-        {"$TIME" , DateTime.Now.ToString("HH:mm:ss")}
+        {"$TIME" , DateTime.Now.ToString("HH:mm:ss")},
+        {"$DATE" , DateTime.Now.Date.ToString("MM/dd/yy")}
     };
 
     static void CreateConfig() {
