@@ -170,7 +170,8 @@ class Program {
             { "asv" , () => { Sharpy.SharpyScript.Interpretator.AssignVar(Variables , input , CmdUsage , Log); }},
             { "whoami" , () => { Sharpy.Commands.WhoAmI.Run(UserName); }},
             { "currdir" , () => { Sharpy.Commands.CurrDir.Run(Log); }},
-            { "makedir" , () => { Sharpy.Commands.MakeDir.Run(CleanUpInput(input) , CheckIfHelp , Log , CmdUsage); }}
+            { "makedir" , () => { Sharpy.Commands.MakeDir.Run(CleanUpInput(input) , CheckIfHelp , Log , CmdUsage); }},
+            { "write" , () => { Sharpy.Commands.Write.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp); } }
         };
 
         try {
