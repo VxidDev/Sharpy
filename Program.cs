@@ -36,7 +36,8 @@ class Program {
         { "asv" , "asv\nUsage: asv <varName> <varValue>\nAssign a variable."},
         { "currdir" , "currdir\nUsage: currdir\nPrint current working directory."},
         { "whoami" , "whoami\nUsage: whoami\nPrint current user."},
-        { "makedir" , "makedir\nUsage: makedir <directoryName>\nCreate a directory."}
+        { "makedir" , "makedir\nUsage: makedir <directoryName>\nCreate a directory."},
+        { "log" , "log\nUsage: log <mode> <text>\nLog text."}
     };
 
     static List<string> Memory = [""];
@@ -117,6 +118,12 @@ class Program {
             { "err" , "\u001b[1;31m" },
             { "wrn" , "\u001b[1;33m" }
         };
+
+        if (!colors.ContainsKey(state)) {
+            Log("Invalid log mode selected!", "err");
+            return;
+        }
+
         Console.WriteLine($"{colors[state]}[ Sharpy ] {text}\u001b[0m");
     }
 
@@ -171,7 +178,8 @@ class Program {
             { "whoami" , () => { Sharpy.Commands.WhoAmI.Run(UserName); }},
             { "currdir" , () => { Sharpy.Commands.CurrDir.Run(Log); }},
             { "makedir" , () => { Sharpy.Commands.MakeDir.Run(CleanUpInput(input) , CheckIfHelp , Log , CmdUsage); }},
-            { "write" , () => { Sharpy.Commands.Write.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp); } }
+            { "write" , () => { Sharpy.Commands.Write.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp); } },
+            { "log" , () => { Sharpy.Commands.Logger.Run(CleanUpInput(input), Log, CmdUsage , CheckIfHelp ); } }
         };
 
         try {
