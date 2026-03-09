@@ -20,6 +20,7 @@ class Program {
 
     static Dictionary<string, string> CmdUsage => new() {
         { "append" , "append:\nUsage: append <filename> <content>\nAppend string to the file." },
+        { "write", "write:\nUsage: write <filename> <content>\nWrite string to a file." },
         { "create" , "create:\nUsage: create <filename>\nCreate empty file." },
         { "remove" , "remove:\nUsage: remove [--force] <filename>\nRemove file/directory." },
         { "changedir" , "changedir:\nUsage: changedir <path>\nChange working directory."},
@@ -37,7 +38,8 @@ class Program {
         { "currdir" , "currdir\nUsage: currdir\nPrint current working directory."},
         { "whoami" , "whoami\nUsage: whoami\nPrint current user."},
         { "makedir" , "makedir\nUsage: makedir <directoryName>\nCreate a directory."},
-        { "log" , "log\nUsage: log <mode> <text>\nLog text."}
+        { "log" , "log\nUsage: log <mode> <text>\nLog text."},
+        { "repeat" , "repeat\nUsage: repeat <times> <stringToExec>\nExecute passed string given amount of times."}
     };
 
     static List<string> Memory = [""];
@@ -179,7 +181,8 @@ class Program {
             { "currdir" , () => { Sharpy.Commands.CurrDir.Run(Log); }},
             { "makedir" , () => { Sharpy.Commands.MakeDir.Run(CleanUpInput(input) , CheckIfHelp , Log , CmdUsage); }},
             { "write" , () => { Sharpy.Commands.Write.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp); } },
-            { "log" , () => { Sharpy.Commands.Logger.Run(CleanUpInput(input), Log, CmdUsage , CheckIfHelp ); } }
+            { "log" , () => { Sharpy.Commands.Logger.Run(CleanUpInput(input), Log, CmdUsage , CheckIfHelp ); } },
+            { "repeat" , () => Sharpy.Commands.Repeat.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp) }
         };
 
         try {
