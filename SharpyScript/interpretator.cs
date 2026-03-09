@@ -26,6 +26,10 @@ static class Interpretator {
         return x == y;
     }
 
+    static bool NotEquals(string x , string y) {
+        return x != y;
+    }
+
     public static (bool , string) If(Dictionary<string , string> Vars , string line , bool IsDebug) {
         string[] items = line.Split();
 
@@ -38,7 +42,8 @@ static class Interpretator {
         if (arg1 is null || arg2 is null) return (false , "Null args");
 
         Dictionary<string, Func<bool>> Logics = new() {
-            { "equals" , () => Equals(arg1 , arg2) }
+            { "equals" , () => Equals(arg1 , arg2) },
+            { "notequals" , () => NotEquals(arg1, arg2) }
         };
 
         if (Logics.TryGetValue(items[1] , out var func)) {

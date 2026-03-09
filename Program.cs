@@ -39,7 +39,9 @@ class Program {
         { "whoami" , "whoami\nUsage: whoami\nPrint current user."},
         { "makedir" , "makedir\nUsage: makedir <directoryName>\nCreate a directory."},
         { "log" , "log\nUsage: log <mode> <text>\nLog text."},
-        { "repeat" , "repeat\nUsage: repeat <times> <stringToExec>\nExecute passed string given amount of times."}
+        { "repeat" , "repeat\nUsage: repeat <times> <stringToExec>\nExecute passed string given amount of times."},
+        { "if" , "if\nUsage: if <logic (available ones: 'equals')> <arg1> <arg2> <alias/command>\nConditional execution." },
+        { "sub" , "sub\nUsage: sub <var> <amount>\nSubtract given amount from a variable."}
     };
 
     static List<string> Memory = [""];
@@ -182,7 +184,9 @@ class Program {
             { "makedir" , () => { Sharpy.Commands.MakeDir.Run(CleanUpInput(input) , CheckIfHelp , Log , CmdUsage); }},
             { "write" , () => { Sharpy.Commands.Write.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp); } },
             { "log" , () => { Sharpy.Commands.Logger.Run(CleanUpInput(input), Log, CmdUsage , CheckIfHelp ); } },
-            { "repeat" , () => Sharpy.Commands.Repeat.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp) }
+            { "repeat" , () => Sharpy.Commands.Repeat.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp) }, 
+            { "if" , () => Sharpy.SharpyScript.Interpretator.If(Variables , input , IsDebug) },
+            { "sub", () => Sharpy.Commands.Sub.Run(CleanUpInput(input) , CheckIfHelp , Log , Variables , CmdUsage) }
         };
 
         try {
