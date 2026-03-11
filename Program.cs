@@ -42,7 +42,9 @@ class Program {
         { "repeat" , "repeat\nUsage: repeat <times> <stringToExec>\nExecute passed string given amount of times."},
         { "if" , "if\nUsage: if <logic (available ones: 'equals')> <arg1> <arg2> <alias/command>\nConditional execution." },
         { "sub" , "sub\nUsage: sub <var> <amount>\nSubtract given amount from a variable."},
-        { "add" , "add\nUsage: add <var> <amount>\nAdd given amount to variable."}
+        { "add" , "add\nUsage: add <var> <amount>\nAdd given amount to variable."},
+        { "dec" , "dec\nUsage: dec <var>\nSubtract 1 from a variable."},
+        { "inc" , "inc\nUsage: inc <var>\nAdd 1 to a variable."}
     };
 
     static List<string> Memory = [""];
@@ -188,7 +190,9 @@ class Program {
             { "repeat" , () => Sharpy.Commands.Repeat.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp) }, 
             { "if" , () => Sharpy.SharpyScript.Interpretator.If(Variables , input , IsDebug) },
             { "sub", () => Sharpy.Commands.Sub.Run(CleanUpInput(input) , CheckIfHelp , Log , Variables , CmdUsage) },
-            { "add", () => Sharpy.Commands.Add.Run(CleanUpInput(input) , CheckIfHelp , Log , Variables , CmdUsage) }
+            { "add", () => Sharpy.Commands.Add.Run(CleanUpInput(input) , CheckIfHelp , Log , Variables , CmdUsage) },
+            { "inc", () => Sharpy.Commands.Inc.Run(CleanUpInput(input) , CheckIfHelp , Log , Variables , CmdUsage)},
+            { "dec", () => Sharpy.Commands.Dec.Run(CleanUpInput(input), CheckIfHelp , Log , Variables , CmdUsage)}
         };
 
         try {
