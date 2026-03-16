@@ -3,16 +3,16 @@ using System.Diagnostics.SymbolStore;
 using System.Collections.Generic;
 
 namespace Sharpy.Commands;
-static class Mul {
+static class Div {
     public static void Run(string input , Func<string , string[] , bool> CheckIfHelp , Action<string , string> Log , Dictionary<string , string> Vars , Dictionary<string , string> CmdUsage) {
         string[] items = input.Trim().Split();
 
         if (items.Length == 1 && items[0] == "") {
-            Log(CmdUsage["mul"] , "nml");
+            Log(CmdUsage["div"] , "nml");
             return;
         }
 
-        if (CheckIfHelp("mul" , items)) return;
+        if (CheckIfHelp("div" , items)) return;
 
         if (!Vars.TryGetValue(items[0] , out string? num)) { 
             Log("Variable not found!" , "err");
@@ -25,11 +25,11 @@ static class Mul {
         }
 
         if (!int.TryParse(items[1] , out var number)) {
-            Log("Multiply amount is not a number." , "err");
+            Log("Divide amount is not a number." , "err");
             return;
         }
 
-        parsedNum *= number;
+        parsedNum /= number;
 
         Vars[items[0]] = parsedNum.ToString();
     }

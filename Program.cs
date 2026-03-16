@@ -45,7 +45,8 @@ class Program {
         { "add" , "add\nUsage: add <var> <amount>\nAdd given amount to variable."},
         { "dec" , "dec\nUsage: dec <var>\nSubtract 1 from a variable."},
         { "inc" , "inc\nUsage: inc <var>\nAdd 1 to a variable."},
-        { "mul" , "mul\nUsage: mul <var> <amount>\nMultiply a variable." }
+        { "mul" , "mul\nUsage: mul <var> <amount>\nMultiply a variable." },
+        { "div" , "div\nUsage: div <var> <amount>\nDivide a variable."}
     };
 
     static List<string> Memory = [""];
@@ -194,7 +195,8 @@ class Program {
             { "add", () => Sharpy.Commands.Add.Run(CleanUpInput(input) , CheckIfHelp , Log , Variables , CmdUsage) },
             { "inc", () => Sharpy.Commands.Inc.Run(CleanUpInput(input) , CheckIfHelp , Log , Variables , CmdUsage)},
             { "dec", () => Sharpy.Commands.Dec.Run(CleanUpInput(input), CheckIfHelp , Log , Variables , CmdUsage)},
-            { "mul", () => Sharpy.Commands.Mul.Run(CleanUpInput(input), CheckIfHelp , Log , Variables , CmdUsage)}
+            { "mul", () => Sharpy.Commands.Mul.Run(CleanUpInput(input), CheckIfHelp , Log , Variables , CmdUsage)},
+            { "div", () => Sharpy.Commands.Div.Run(CleanUpInput(input), CheckIfHelp , Log , Variables , CmdUsage)}
         };
 
         try {
