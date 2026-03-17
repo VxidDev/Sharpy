@@ -46,7 +46,8 @@ class Program {
         { "dec" , "dec\nUsage: dec <var>\nSubtract 1 from a variable."},
         { "inc" , "inc\nUsage: inc <var>\nAdd 1 to a variable."},
         { "mul" , "mul\nUsage: mul <var> <amount>\nMultiply a variable." },
-        { "div" , "div\nUsage: div <var> <amount>\nDivide a variable."}
+        { "div" , "div\nUsage: div <var> <amount>\nDivide a variable."},
+        { "rem" , "rem\nUsage: rem <var> <amount>\nGet a remainer of a number and store it in $REM."}
     };
 
     static List<string> Memory = [""];
@@ -196,7 +197,8 @@ class Program {
             { "inc", () => Sharpy.Commands.Inc.Run(CleanUpInput(input) , CheckIfHelp , Log , Variables , CmdUsage)},
             { "dec", () => Sharpy.Commands.Dec.Run(CleanUpInput(input), CheckIfHelp , Log , Variables , CmdUsage)},
             { "mul", () => Sharpy.Commands.Mul.Run(CleanUpInput(input), CheckIfHelp , Log , Variables , CmdUsage)},
-            { "div", () => Sharpy.Commands.Div.Run(CleanUpInput(input), CheckIfHelp , Log , Variables , CmdUsage)}
+            { "div", () => Sharpy.Commands.Div.Run(CleanUpInput(input), CheckIfHelp , Log , Variables , CmdUsage)},
+            { "rem", () => Sharpy.Commands.Rem.Run(CleanUpInput(input) , CheckIfHelp , Log , Variables , CmdUsage)}
         };
 
         try {
