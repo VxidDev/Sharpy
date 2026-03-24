@@ -166,44 +166,50 @@ class Program {
             return;
         }
 
-        Dictionary<string, Action> AvailableCommands = new() {
-            { "echo" , () => Sharpy.Commands.Echo.Run(CleanUpInput(input) , CheckIfHelp , Variables , Log) },
-            { "clear" , Console.Clear },
-            { "exit" , () => Environment.Exit(0) },
-            { "list" , () => Sharpy.Commands.List.Run(CleanUpInput(input) , CheckIfHelp , UserName , Log , Sharpy.Helpers.PrintGradient.Run) },
-            { "create" , () => Sharpy.Commands.Create.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp) },
-            { "remove" , () => Sharpy.Commands.Remove.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp) },
-            { "append" , () => Sharpy.Commands.Append.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp) },
-            { "changedir" , () => Sharpy.Commands.Changedir.Run(CleanUpInput(input) , Log , CmdUsage , UserName , CheckIfHelp) },
-            { "read" , () => Sharpy.Commands.Read.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp) },
-            { "help" , () => Sharpy.Commands.Help.Run(CleanUpInput(input) , CheckIfHelp , Log , CmdUsage) },
-            { "alias" , () => { Aliases = Sharpy.Shell.Alias.Run(CleanUpInput(input) , Log , CheckIfHelp , CmdUsage , Aliases); } },
-            { "sdb" , () => { IsDebug = Sharpy.Shell.Sdb.Run(CleanUpInput(input) , Log , CheckIfHelp , IsDebug , Aliases , IsSudo , CmdUsage , Memory , PrevMemoryId); } },
-            { "prompt" , () => { prompt = Sharpy.Shell.Prompt.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp , prompt , Variables); } },
-            { "export" , () => Sharpy.Shell.Export.Run(ExportPath , CreateConfig , Log , prompt , IsDebug , Aliases) },
-            { "history" , () => { (Memory , PrevMemoryId) = Sharpy.Shell.History.Run(CleanUpInput(input) , Memory , PrevMemoryId , Log , CmdUsage , CheckIfHelp); } },
-            { "time" , () => { Sharpy.Commands.Time.Run(CleanUpInput(input) , Log); } },
-            { "sscript" , () => { Sharpy.SharpyScript.Interpretator.Run(CleanUpInput(input) , Log , IsDebug , CmdUsage , CheckIfHelp , Variables); }}, 
-            { "asv" , () => { Sharpy.SharpyScript.Interpretator.AssignVar(Variables , input , CmdUsage , Log); }},
-            { "whoami" , () => { Sharpy.Commands.WhoAmI.Run(UserName); }},
-            { "currdir" , () => { Sharpy.Commands.CurrDir.Run(Log); }},
-            { "makedir" , () => { Sharpy.Commands.MakeDir.Run(CleanUpInput(input) , CheckIfHelp , Log , CmdUsage); }},
-            { "write" , () => { Sharpy.Commands.Write.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp); } },
-            { "log" , () => { Sharpy.Commands.Logger.Run(CleanUpInput(input), Log, CmdUsage , CheckIfHelp ); } },
-            { "repeat" , () => Sharpy.Commands.Repeat.Run(CleanUpInput(input) , Log , CmdUsage , CheckIfHelp) }, 
-            { "if" , () => Sharpy.SharpyScript.Interpretator.If(Variables , input , IsDebug) },
-            { "sub", () => Sharpy.Commands.Sub.Run(CleanUpInput(input) , CheckIfHelp , Log , Variables , CmdUsage) },
-            { "add", () => Sharpy.Commands.Add.Run(CleanUpInput(input) , CheckIfHelp , Log , Variables , CmdUsage) },
-            { "inc", () => Sharpy.Commands.Inc.Run(CleanUpInput(input) , CheckIfHelp , Log , Variables , CmdUsage)},
-            { "dec", () => Sharpy.Commands.Dec.Run(CleanUpInput(input), CheckIfHelp , Log , Variables , CmdUsage)},
-            { "mul", () => Sharpy.Commands.Mul.Run(CleanUpInput(input), CheckIfHelp , Log , Variables , CmdUsage)},
-            { "div", () => Sharpy.Commands.Div.Run(CleanUpInput(input), CheckIfHelp , Log , Variables , CmdUsage)},
-            { "rem", () => Sharpy.Commands.Rem.Run(CleanUpInput(input) , CheckIfHelp , Log , Variables , CmdUsage)}
+        Dictionary<string, Action<string>> AvailableCommands = new()
+        {
+            { "echo", input => Commands.Echo.Run(CleanUpInput(input), CheckIfHelp, Variables, Log) },
+            { "clear", input => Console.Clear() },
+            { "exit", input => Environment.Exit(0) },
+            { "list", input => Commands.List.Run(CleanUpInput(input), CheckIfHelp, UserName, Log, Sharpy.Helpers.PrintGradient.Run) },
+            { "create", input => Commands.Create.Run(CleanUpInput(input), Log, CmdUsage, CheckIfHelp) },
+            { "remove", input => Commands.Remove.Run(CleanUpInput(input), Log, CmdUsage, CheckIfHelp) },
+            { "append", input => Commands.Append.Run(CleanUpInput(input), Log, CmdUsage, CheckIfHelp) },
+            { "changedir", input => Commands.Changedir.Run(CleanUpInput(input), Log, CmdUsage, UserName, CheckIfHelp) },
+            { "read", input => Commands.Read.Run(CleanUpInput(input), Log, CmdUsage, CheckIfHelp) },
+            { "help", input => Commands.Help.Run(CleanUpInput(input), CheckIfHelp, Log, CmdUsage) },
+            { "alias", input => { Aliases = Sharpy.Shell.Alias.Run(CleanUpInput(input), Log, CheckIfHelp, CmdUsage, Aliases); } },
+            { "sdb", input => { IsDebug = Sharpy.Shell.Sdb.Run(CleanUpInput(input), Log, CheckIfHelp, IsDebug, Aliases, IsSudo, CmdUsage, Memory, PrevMemoryId); } },
+            { "prompt", input => { prompt = Sharpy.Shell.Prompt.Run(CleanUpInput(input), Log, CmdUsage, CheckIfHelp, prompt, Variables); } },
+            { "export", input => Shell.Export.Run(ExportPath, CreateConfig, Log, prompt, IsDebug, Aliases) },
+            { "history", input => { (Memory, PrevMemoryId) = Sharpy.Shell.History.Run(CleanUpInput(input), Memory, PrevMemoryId, Log, CmdUsage, CheckIfHelp); } },
+            { "time", input => { Commands.Time.Run(CleanUpInput(input), Log); } },
+            { "sscript", input => { SharpyScript.Interpretator.Run(CleanUpInput(input), Log, IsDebug, CmdUsage, CheckIfHelp, Variables); } },
+            { "asv", input => { SharpyScript.Interpretator.AssignVar(Variables, input, CmdUsage, Log); } },
+            { "whoami", input => { Commands.WhoAmI.Run(UserName); } },
+            { "currdir", input => { Commands.CurrDir.Run(Log); } },
+            { "makedir", input => { Commands.MakeDir.Run(CleanUpInput(input), CheckIfHelp, Log, CmdUsage); } },
+            { "write", input => { Commands.Write.Run(CleanUpInput(input), Log, CmdUsage, CheckIfHelp); } },
+            { "log", input => { Commands.Logger.Run(CleanUpInput(input), Log, CmdUsage, CheckIfHelp); } },
+            { "repeat", input => Commands.Repeat.Run(CleanUpInput(input), Log, CmdUsage, CheckIfHelp) },
+            { "if", input => SharpyScript.Interpretator.If(Variables, input, IsDebug) },
+            { "sub", input => Commands.Sub.Run(CleanUpInput(input), CheckIfHelp, Log, Variables, CmdUsage) },
+            { "add", input => Commands.Add.Run(CleanUpInput(input), CheckIfHelp, Log, Variables, CmdUsage) },
+            { "inc", input => Commands.Inc.Run(CleanUpInput(input), CheckIfHelp, Log, Variables, CmdUsage) },
+            { "dec", input => Commands.Dec.Run(CleanUpInput(input), CheckIfHelp, Log, Variables, CmdUsage) },
+            { "mul", input => Commands.Mul.Run(CleanUpInput(input), CheckIfHelp, Log, Variables, CmdUsage) },
+            { "div", input => Commands.Div.Run(CleanUpInput(input), CheckIfHelp, Log, Variables, CmdUsage) },
+            { "rem", input => Commands.Rem.Run(CleanUpInput(input), CheckIfHelp, Log, Variables, CmdUsage) }
         };
 
         try {
-            // Console.WriteLine(input.Split()[0]);
-            AvailableCommands[input.Split()[0]]();
+            string[] commands = input.Split(';');
+            
+            foreach (var command in commands) {
+                string[] items = command.Split();
+                AvailableCommands[items[0]](command);
+            }
+
         } catch (KeyNotFoundException) {
             if (Aliases.ContainsKey(input.Split()[0])) {
                 ParseInput(Aliases[input.Split()[0]]);
